@@ -9,18 +9,32 @@ mod incrementer {
     #[ink(storage)]
     pub struct Incrementer {
         // Storage declaration
+        pub value: i32,
     }
 
     impl Incrementer {
         #[ink(constructor)]
-        pub fn new() -> Self {
+        pub fn new(init_value: i32) -> Self {
             // Contract Constructor
-            Self {}
+            Self {value: init_value}
+        }
+
+        #[ink(constructor)]
+        pub fn default() -> Self {
+            // Contract Constructor
+            Self {value: 0}
         }
 
         #[ink(message)]
-        pub fn get(&self) {
+        pub fn get(&self) -> i32 {
             // Contract Message
+            self.value
+        }
+
+        #[ink(message)]
+        pub fn inc(&mut self, by: i32) {
+            // Contract Message
+            self.value = self.value.saturating_add(by);
         }
     }
 
@@ -36,6 +50,17 @@ mod incrementer {
         #[ink::test]
         fn default_works() {
             // Test Contract
+            let incrementer = Incrementer::default();
+            assert_eq!(incrementer.get(), 0);
+        }
+
+        #[ink::test]
+        fn it_works() {
+            // Test Contract
+            let mut incrementer = Incrementer::new(42);
+            assert_eq!(incrementer.get(), 42);
+            incrementer.inc(5);
+            assert_eq!(incrementer.get(), 47);
         }
     }
 }
